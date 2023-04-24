@@ -9,12 +9,6 @@ class ToastController {
     final snackBar = SnackBar(
       content: Text(
         message,
-        /*  style: getTextStyle(
-            Theme.of(NavigatorKey.navigatorKey.currentContext!)
-                .primaryTextTheme
-                .headline2!,
-            Dimens.margin15,
-            FontWeight.w500),*/
       ),
       backgroundColor: isSuccess ? Colors.green : Colors.red,
       duration: Duration(seconds: time),

@@ -20,7 +20,7 @@ class RowDashboardListItem extends StatelessWidget {
         height: Dimens.margin70,
         width: Dimens.margin50,
         child: ImageViewerNetwork(
-            url: (modelDashboardListItem.owner?.avatarUrl) ?? randomImage(),
+            url: (modelDashboardListItem.avatarUrl) ?? randomImage(),
             mHeight: Dimens.margin70,
             mWidth: Dimens.margin50),
       );

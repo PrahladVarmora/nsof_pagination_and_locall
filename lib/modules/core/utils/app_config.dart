@@ -11,11 +11,21 @@ class AppConfig {
   static const String xAcceptType = 'Accept-type';
   static const String xAcceptDeviceIOS = '1';
   static const String xAcceptDeviceAndroid = '2';
-  static const String xUserTimeZone = 'user_tz';
 
-  static const String pageLimit = '10';
-  static const int pageLimitCount = 10;
+  static const String pageLimit = '15';
+  static const int pageLimitCount = 15;
 
   ///API NAME
   static String apiRepos = '${baseUrl}repos?page={#}&per_page={#}';
+
+  ///Data base
+  static const String tableDashboardList = 'dashboard_list';
+  static const String dashboardListId = 'id';
+  static const String dashboardListName = 'name';
+  static const String dashboardListAvatarUrl = 'avatar_url';
+  static const String dashboardListDescription = 'description';
+  static const String dashboardListWatchersCount = 'watchers_count';
+  static const String dashboardListLanguage = 'language';
+  static const String dashboardListHasIssues = 'has_issues';
+  static const String dashboardListOpenIssuesCount = 'open_issues_count';
 }

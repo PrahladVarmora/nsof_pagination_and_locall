@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "214432049139",
+    "project_id": "fir-app-65685",
+    "storage_bucket": "fir-app-65685.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214432049139:android:89b75ee1e683069ab8d486",
+        "android_client_info": {
+          "package_name": "com.example.nstack_softech_practical"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "214432049139-qllv69oegfqc2q5k5sgbm11o4773pbi7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmG8ygBAO-7bD6EAHUf8k_pe6va6TmAVs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "214432049139-qllv69oegfqc2q5k5sgbm11o4773pbi7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "214432049139-jccjjj0r8bhdtammef8sj7fugqim7bbv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.remotconfigDemo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

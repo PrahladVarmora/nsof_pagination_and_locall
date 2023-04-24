@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
+import 'package:nstack_softech_practical/modules/core/database/db_helper.dart';
 import 'package:nstack_softech_practical/modules/core/utils/common_import.dart';
 import 'package:nstack_softech_practical/modules/dashboard/model/model_dashboard_list_item.dart';
 import 'package:nstack_softech_practical/modules/dashboard/repository/repository_dashboard.dart';
 
 part 'dashboard_event.dart';
-
 part 'dashboard_state.dart';
 
 /// Notifies the [DashboardBloc] of a new [DashboardEvent] which triggers
@@ -16,9 +16,11 @@ part 'dashboard_state.dart';
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   DashboardBloc({
     required RepositoryDashboard repository,
+    required DataBaseHelper dataBaseHelper,
     required ApiProvider apiProvider,
     required http.Client client,
-  })  : mRepositoryDashboard = repository,
+  })  : mDataBaseHelper = dataBaseHelper,
+        mRepositoryDashboard = repository,
         mApiProvider = apiProvider,
         mClient = client,
         super(DashboardInitial()) {
@@ -26,8 +28,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }
 
   final RepositoryDashboard mRepositoryDashboard;
+  final DataBaseHelper mDataBaseHelper;
   final ApiProvider mApiProvider;
   final http.Client mClient;
+  List<ModelDashboardListItem> mListLocal = [];
 
   /// This is a private asynchronous function that handles the "GetDashboardItems" event and updates the state of the dashboard accordingly.
   ///
@@ -41,18 +45,38 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     /// Emitting an DashboardLoading state.
     emit(DashboardLoading());
     try {
-      /// This is a way to handle the response from the API call.
-      Either<List<ModelDashboardListItem>, ModelCommonAuthorised> response =
-          await mRepositoryDashboard.callGetDataAPI(event.url,
-              await mApiProvider.getHeaderValue(), mApiProvider, mClient);
-      response.fold(
-        (success) {
-          emit(DashboardResponse(mModelDashboardList: success));
-        },
-        (error) {
-          emit(DashboardFailure(mError: error.message!));
-        },
-      );
+      if (!await checkConnectivity()) {
+        if (event.mPage == 1) {
+          mListLocal = await mDataBaseHelper.getDashboardListData(
+              mPage: event.mPage, mSize: AppConfig.pageLimitCount);
+        }
+        List<ModelDashboardListItem> mListLocalPagination = mListLocal.sublist(
+            (event.mPage - 1) * AppConfig.pageLimitCount,
+            ((event.mPage - 1) * AppConfig.pageLimitCount) +
+                AppConfig.pageLimitCount);
+
+        emit(DashboardResponse(mModelDashboardList: mListLocalPagination));
+      } else {
+        Either<List<ModelDashboardListItem>, ModelCommonAuthorised> response =
+            await mRepositoryDashboard.callGetDataAPI(event.url,
+                await mApiProvider.getHeaderValue(), mApiProvider, mClient);
+        await response.fold(
+          (success) async {
+            try {
+              if (event.mPage == 1) {
+                await mDataBaseHelper.deleteAllData();
+              }
+              await mDataBaseHelper.insertDashboardListData(success);
+              emit(DashboardResponse(mModelDashboardList: success));
+            } catch (e) {
+              emit(DashboardFailure(mError: e.toString()));
+            }
+          },
+          (error) async {
+            emit(DashboardFailure(mError: error.message!));
+          },
+        );
+      }
     } on SocketException {
       emit(const DashboardFailure(
           mError: ValidationString.validationNoInternetFound));

@@ -16,12 +16,10 @@ class AuthLoading extends AuthState {}
 
 /// [AuthResponse] class is used Auth State Response
 class AuthResponse extends AuthState {
-  final ModelUser mModelUser;
-
-  const AuthResponse({required this.mModelUser});
+  const AuthResponse();
 
   @override
-  List<Object> get props => [mModelUser];
+  List<Object> get props => [];
 }
 
 /// [AuthFailure] class is used Auth State Failure

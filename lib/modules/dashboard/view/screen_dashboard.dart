@@ -1,3 +1,5 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:nstack_softech_practical/app.dart';
 import 'package:nstack_softech_practical/modules/core/utils/common_import.dart';
 import 'package:nstack_softech_practical/modules/core/utils/interpolate.dart';
 import 'package:nstack_softech_practical/modules/dashboard/bloc/dashboard_bloc.dart';
@@ -25,6 +27,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   @override
   void initState() {
     initData();
+    subscribeConnectivityStream();
     super.initState();
   }
 
@@ -32,8 +35,9 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   void initData() {
     BlocProvider.of<DashboardBloc>(getNavigatorKeyContext())
         .add(GetDashboardItems(
+      mPage: mNextPage,
       url: InterpolateString.interpolate(
-          AppConfig.apiRepos, ['$mNextPage', '15']),
+          AppConfig.apiRepos, ['$mNextPage', AppConfig.pageLimit]),
     ));
   }
 
@@ -43,6 +47,8 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     Widget getDashboardBody() {
       return BlocListener<DashboardBloc, DashboardState>(
         listener: (context, state) {
+          mLoading.value = (state is DashboardLoading && mNextPage == 1);
+          mPagination.value = (state is DashboardLoading && mNextPage > 1);
           if (state is DashboardResponse) {
             if (mNextPage == 1) {
               mModelDashboardList.value = state.mModelDashboardList;
@@ -50,7 +56,8 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
               mModelDashboardList.value.addAll(state.mModelDashboardList);
             }
             mPagination.value = false;
-            isNextPage = state.mModelDashboardList.length == 15;
+            isNextPage =
+                state.mModelDashboardList.length == AppConfig.pageLimitCount;
           }
         },
         child: ListView.builder(
@@ -107,9 +114,52 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
 
   void loadMoreData() {
     if (isNextPage && !mPagination.value) {
-      mPagination.value = true;
+      // mPagination.value = true;
       mNextPage += 1;
       initData();
     }
+  }
+
+  /// This function is likely used in Dart programming to subscribe to a
+  /// connectivity stream.
+  Future<void> subscribeConnectivityStream() async {
+    MyAppState.isConnected = await checkConnectivity();
+    await Future.delayed(const Duration(seconds: 1)).whenComplete(() {
+      if (!MyAppState.isConnected) {
+        ToastController.showToast(APPStrings.textOffline.translate(), false,
+            time: 4);
+      }
+    });
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult event) {
+      if (event == ConnectivityResult.mobile ||
+          event == ConnectivityResult.wifi) {
+        ///All Ok
+
+        ToastController.showToast(APPStrings.textBackOnline.translate(), true,
+            time: 4);
+
+        if (!MyAppState.isConnected) {
+          ///Reset API when reconnect to internet
+          BlocProvider.of<DashboardBloc>(getNavigatorKeyContext()).add(
+              GetDashboardItems(
+                  url: InterpolateString.interpolate(
+                      AppConfig.apiRepos, ['1', AppConfig.pageLimit]),
+                  mPage: 1));
+        }
+        MyAppState.isConnected = true;
+      } else {
+        ToastController.showToast(APPStrings.textOffline.translate(), false,
+            time: 4);
+        if (MyAppState.isConnected) {
+          ///Get Data when internet disconnected
+          BlocProvider.of<DashboardBloc>(getNavigatorKeyContext()).add(
+              GetDashboardItems(
+                  url: InterpolateString.interpolate(
+                      AppConfig.apiRepos, ['1', AppConfig.pageLimit]),
+                  mPage: 1));
+        }
+        MyAppState.isConnected = false;
+      }
+    });
   }
 }

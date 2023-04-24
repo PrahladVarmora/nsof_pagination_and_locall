@@ -1,4 +1,10 @@
 {
   "app_name": "Nstack Softech Practical",
-  "text_jake_s_git": "Jake's Git"
+  "text_jake_s_git": "Jake's Git",
+  "text_back_online": "Connected to internet, updating records",
+  "text_offline": "Connect internet to get updated records",
+  "text_log_in": "Log In",
+  "text_or_continue_with_biometric": "Or Continue With Biometric",
+  "text_enter_phone_number": "Enter Phone Number with country code",
+  "text_send_otp": "Send OTP"
 }

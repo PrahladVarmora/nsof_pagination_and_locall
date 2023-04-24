@@ -37,9 +37,13 @@ class RepositoryDashboard {
     return response.fold(
       (success) {
         List<ModelDashboardListItem> result = [];
-        result = List<ModelDashboardListItem>.from(json
-            .decode(success)
-            .map((data) => ModelDashboardListItem.fromJson(data)));
+        try {
+          result = List<ModelDashboardListItem>.from(json
+              .decode(success)
+              .map((data) => ModelDashboardListItem.fromJson(data)));
+        } catch (e) {
+          printWrapped('errorrrrr------$e');
+        }
 
         return left(result);
       },

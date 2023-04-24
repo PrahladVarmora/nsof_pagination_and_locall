@@ -11,11 +11,21 @@ abstract class AuthEvent extends Equatable {
 
 /// [AuthUser] abstract class is used Auth Event
 class AuthUser extends AuthEvent {
-  const AuthUser({required this.url, required this.body});
+  const AuthUser({required this.phone});
 
-  final String url;
-  final Map<String, dynamic> body;
+  final String phone;
 
   @override
-  List<Object> get props => [url, body];
+  List<Object> get props => [phone];
+}
+
+/// [AuthUser] abstract class is used Auth Event
+class AuthOTP extends AuthEvent {
+  const AuthOTP({required this.verificationId, required this.otp});
+
+  final String otp;
+  final String verificationId;
+
+  @override
+  List<Object> get props => [otp];
 }

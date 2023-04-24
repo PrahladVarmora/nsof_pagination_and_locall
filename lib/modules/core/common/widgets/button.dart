@@ -16,8 +16,8 @@ class CustomButton extends StatelessWidget {
     this.buttonText,
     this.height,
     this.width,
-    this.backgroundColor,
-    this.borderColor,
+    this.backgroundColor = AppColors.colorPrimary,
+    this.borderColor = AppColors.colorPrimary,
     this.borderRadius,
     this.onPress,
     this.style,
@@ -61,7 +61,7 @@ class CustomButton extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius:
                     BorderRadius.all(Radius.circular(borderRadius ?? 0)),
-                color: backgroundColor ?? Theme.of(context).primaryColor,
+                color: backgroundColor,
                 border: Border.all(
                     color: borderColor ?? Theme.of(context).primaryColor),
               ),

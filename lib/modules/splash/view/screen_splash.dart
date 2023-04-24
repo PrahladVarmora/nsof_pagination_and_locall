@@ -14,7 +14,7 @@ class _ScreenSplashState extends State<ScreenSplash> {
   void initState() {
     Timer(const Duration(seconds: 2), () async {
       Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.routesDashboard, (route) => false);
+          context, AppRoutes.routesLogin, (route) => false);
     });
     super.initState();
   }

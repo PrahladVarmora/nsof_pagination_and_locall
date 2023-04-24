@@ -11,9 +11,10 @@ abstract class DashboardEvent extends Equatable {
 
 /// [GetDashboardItems] abstract class is used Dashboard Event
 class GetDashboardItems extends DashboardEvent {
-  const GetDashboardItems({required this.url});
+  const GetDashboardItems({required this.url, required this.mPage});
 
   final String url;
+  final int mPage;
 
   @override
   List<Object> get props => [

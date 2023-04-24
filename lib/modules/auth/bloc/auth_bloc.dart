@@ -1,34 +1,20 @@
 import 'dart:io';
 
-import 'package:dartz/dartz.dart';
-import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../core/utils/common_import.dart';
-import '../model/model_user.dart';
-import '../repository/repository_auth.dart';
 
 part 'auth_event.dart';
-
 part 'auth_state.dart';
 
 /// Notifies the [AuthBloc] of a new [AuthEvent] which triggers
 /// [RepositoryAuth] This class used to API and bloc connection.
 /// [ApiProvider] class is used to network API call.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({
-    required RepositoryAuth repository,
-    required ApiProvider apiProvider,
-    required http.Client client,
-  })  : mRepositoryAuth = repository,
-        mApiProvider = apiProvider,
-        mClient = client,
-        super(AuthInitial()) {
+  AuthBloc() : super(AuthInitial()) {
     on<AuthUser>(_onAuthNewUser);
+    on<AuthOTP>(_onAuthOTP);
   }
-
-  final RepositoryAuth mRepositoryAuth;
-  final ApiProvider mApiProvider;
-  final http.Client mClient;
 
   /// _onAuthNewUser is a function that takes an AuthUser event, an Emitter<AuthState> emit, and returns
   /// a Future<void> that emits an AuthLoading state, and then either an AuthResponse state or an
@@ -42,20 +28,60 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     /// Emitting an AuthLoading state.
+
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      await auth.verifyPhoneNumber(
+        phoneNumber: event.phone,
+        verificationCompleted: (PhoneAuthCredential credential) {},
+        verificationFailed: (FirebaseAuthException e) {
+          ToastController.showToast(e.message.toString(), false);
+          emit(AuthFailure(mError: e.message.toString()));
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          printWrapped(
+              'codeSent-----verificationId==$verificationId------resendToken==$resendToken');
+
+          Navigator.pushNamed(
+              getNavigatorKeyContext(), AppRoutes.routesOtpVerification,
+              arguments: verificationId);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
+    } on SocketException {
+      emit(const AuthFailure(
+          mError: ValidationString.validationNoInternetFound));
+    } catch (e) {
+      if (e.toString().contains(ValidationString.validationXMLHttpRequest)) {
+        emit(const AuthFailure(
+            mError: ValidationString.validationNoInternetFound));
+      } else {
+        emit(const AuthFailure(
+            mError: ValidationString.validationInternalServerIssue));
+      }
+    }
+  }
+
+  void _onAuthOTP(
+    AuthOTP event,
+    Emitter<AuthState> emit,
+  ) async {
+    /// Emitting an AuthLoading state.
     emit(AuthLoading());
     try {
-      /// This is a way to handle the response from the API call.
-      Either<ModelUser, ModelCommonAuthorised> response =
-          await mRepositoryAuth.callPostApi(event.url,
-              await mApiProvider.getHeaderValue(), mApiProvider, mClient);
-      response.fold(
-        (success) {
-          emit(AuthResponse(mModelUser: success));
-        },
-        (error) {
-          emit(AuthFailure(mError: error.message!));
-        },
-      );
+      FirebaseAuth auth = FirebaseAuth.instance;
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+          verificationId: event.verificationId, smsCode: event.otp);
+
+      UserCredential mUser = await auth.signInWithCredential(credential);
+
+      if (mUser.user != null) {
+        Navigator.pushNamedAndRemoveUntil(getNavigatorKeyContext(),
+            AppRoutes.routesDashboard, (route) => false);
+        emit(const AuthResponse());
+      } else {
+        emit(const AuthFailure(mError: 'Failed'));
+      }
     } on SocketException {
       emit(const AuthFailure(
           mError: ValidationString.validationNoInternetFound));

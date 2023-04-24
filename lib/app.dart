@@ -4,12 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:nstack_softech_practical/modules/auth/bloc/auth_bloc.dart';
 import 'package:nstack_softech_practical/modules/core/api_service/preference_helper.dart';
 import 'package:nstack_softech_practical/modules/core/common/widgets/app_localizations.dart';
+import 'package:nstack_softech_practical/modules/core/database/db_helper.dart';
 import 'package:nstack_softech_practical/modules/core/utils/common_import.dart';
 import 'package:nstack_softech_practical/modules/dashboard/bloc/dashboard_bloc.dart';
 import 'package:nstack_softech_practical/modules/dashboard/repository/repository_dashboard.dart';
 import 'package:provider/provider.dart';
-
-import 'modules/auth/repository/repository_auth.dart';
 
 /// Used by [MyApp] StatefulWidget for init of app
 ///[MultiProvider] A provider that merges multiple providers into a single linear widget tree.
@@ -26,8 +25,10 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   late ApiProvider apiProvider;
   late http.Client client;
+  DataBaseHelper mOpenDBHelper = DataBaseHelper();
   static ValueNotifier<Locale> notifier =
       ValueNotifier<Locale>(const Locale(APPStrings.languageEn));
+  static bool isConnected = false;
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class MyAppState extends State<MyApp> {
     super.initState();
   }
 
+  /// The function "init" is being defined in Dart programming language.
   void init() {
     PreferenceHelper.load().whenComplete(() {
       updateLanguage();
@@ -52,13 +54,11 @@ class MyAppState extends State<MyApp> {
         return MultiProvider(
           providers: [
             BlocProvider<AuthBloc>(
-              create: (BuildContext context) => AuthBloc(
-                  apiProvider: apiProvider,
-                  client: client,
-                  repository: RepositoryAuth()),
+              create: (BuildContext context) => AuthBloc(),
             ),
             BlocProvider<DashboardBloc>(
               create: (BuildContext context) => DashboardBloc(
+                  dataBaseHelper: mOpenDBHelper,
                   apiProvider: apiProvider,
                   client: client,
                   repository: RepositoryDashboard()),
