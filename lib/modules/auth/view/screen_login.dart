@@ -121,8 +121,10 @@ class ScreenLoginState extends State<ScreenLogin> {
           APPStrings.textEnterPhoneNumber.translate(), false);
     } else {
       mLoading.value = true;
-      BlocProvider.of<AuthBloc>(context)
-          .add(AuthUser(phone: phoneNumberController.text));
+      Navigator.pushNamedAndRemoveUntil(getNavigatorKeyContext(),
+          AppRoutes.routesDashboard, (route) => false);
+      /* BlocProvider.of<AuthBloc>(context)
+          .add(AuthUser(phone: phoneNumberController.text));*/
     }
   }
 }
